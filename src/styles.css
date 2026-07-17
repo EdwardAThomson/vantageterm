@@ -1,0 +1,464 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #1e1e1e;
+  --bg-sidebar: #252526;
+  --bg-tabs: #2d2d2d;
+  --bg-tab-active: #1e1e1e;
+  --fg: #cccccc;
+  --fg-dim: #858585;
+  --accent: #0e639c;
+  --border: #3c3c3c;
+  --git-modified: #e2c08d;
+  --git-added: #81b88b;
+  --git-deleted: #f48771;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--fg);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+#app {
+  display: grid;
+  grid-template-columns: 48px 280px 4px 1fr;
+  height: 100vh;
+}
+
+/* ---------- project rail ---------- */
+
+#project-rail {
+  background: #2d2d2e;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  overflow-y: auto;
+}
+
+.proj-tile,
+#add-project {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #3c3c3d;
+  color: var(--fg);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.proj-tile:hover,
+#add-project:hover {
+  background: #4a4a4b;
+}
+
+.proj-tile.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+#add-project {
+  font-size: 18px;
+  color: var(--fg-dim);
+  background: none;
+}
+
+#splitter-v {
+  cursor: col-resize;
+  background: var(--border);
+}
+
+#splitter-v:hover {
+  background: var(--accent);
+}
+
+/* ---------- sidebar ---------- */
+
+#sidebar {
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  user-select: none;
+}
+
+.sidebar-header {
+  padding: 8px 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: var(--fg-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px 2px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--fg-dim);
+}
+
+.sidebar-section-title button {
+  border: none;
+  background: none;
+  color: var(--fg-dim);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 3px;
+}
+
+.sidebar-section-title button:hover {
+  background: #37373d;
+  color: var(--fg);
+}
+
+#changes {
+  padding-bottom: 6px;
+}
+
+.change-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 12px 2px 18px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.change-row:hover {
+  background: #2a2d2e;
+}
+
+.change-status {
+  font-family: monospace;
+  font-weight: 700;
+  width: 14px;
+  flex: none;
+}
+
+.change-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.change-dir {
+  color: var(--fg-dim);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.changes-empty {
+  padding: 2px 18px;
+  color: var(--fg-dim);
+  font-style: italic;
+}
+
+/* ---------- file tree ---------- */
+
+.tree-node {
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tree-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 4px;
+}
+
+.tree-label:hover {
+  background: #2a2d2e;
+}
+
+.tree-label.selected {
+  background: #37373d;
+}
+
+.tree-caret {
+  width: 12px;
+  flex: none;
+  text-align: center;
+  color: var(--fg-dim);
+  font-size: 10px;
+}
+
+.tree-children {
+  padding-left: 14px;
+}
+
+.tree-label.git-modified {
+  color: var(--git-modified);
+}
+
+.tree-label.git-added {
+  color: var(--git-added);
+}
+
+.tree-label.git-deleted {
+  color: var(--git-deleted);
+}
+
+/* ---------- main column: category bar, sub-tab strip, pane area ---------- */
+
+#maincol {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+#cat-bar {
+  display: flex;
+  background: #333334;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+
+.cat {
+  border: none;
+  background: none;
+  color: var(--fg-dim);
+  padding: 11px 26px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid transparent;
+}
+
+.cat:hover {
+  color: var(--fg);
+}
+
+.cat.active {
+  color: var(--fg);
+  border-bottom-color: var(--accent);
+  background: var(--bg-tabs);
+}
+
+.tabstrip.hidden {
+  display: none;
+}
+
+#panes {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.tab-pane {
+  position: absolute;
+  inset: 0;
+}
+
+.tab-pane.hidden {
+  display: none;
+}
+
+.tab-pane.term-pane {
+  background: #000;
+  padding: 4px;
+}
+
+.term-pane .xterm {
+  height: 100%;
+}
+
+#empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-dim);
+}
+
+.tabstrip {
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-tabs);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  flex: none;
+  min-height: 40px;
+}
+
+/* Slim, unobtrusive horizontal scrollbar so it doesn't cover the tab text. */
+.tabstrip::-webkit-scrollbar {
+  height: 6px;
+}
+.tabstrip::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 3px;
+}
+.tabstrip::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* A tab belonging to a non-active project is hidden from the strip. */
+.tab.hidden {
+  display: none;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--fg-dim);
+  font-size: 14px;
+}
+
+.tab.active {
+  background: var(--bg-tab-active);
+  color: var(--fg);
+}
+
+.tab .close {
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 3px;
+}
+
+.tab .close:hover {
+  background: #45454d;
+}
+
+#new-term {
+  border: none;
+  background: none;
+  color: var(--fg);
+  font-size: 18px;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+#new-term:hover {
+  background: #37373d;
+}
+
+
+/* ---------- modal dialogs ---------- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 15vh;
+  z-index: 100;
+}
+
+.modal-box {
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px;
+  min-width: 340px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.modal-title {
+  margin-bottom: 10px;
+}
+
+.modal-input {
+  width: 100%;
+  background: #3c3c3c;
+  border: 1px solid var(--accent);
+  color: var(--fg);
+  padding: 5px 8px;
+  border-radius: 3px;
+  font-size: 13px;
+  outline: none;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.modal-buttons button {
+  background: #3c3c3c;
+  border: none;
+  color: var(--fg);
+  padding: 5px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.modal-buttons .modal-ok {
+  background: var(--accent);
+  color: #fff;
+}
+
+.modal-buttons button:hover {
+  filter: brightness(1.2);
+}
+
+/* ---------- context menu ---------- */
+
+.context-menu {
+  position: fixed;
+  background: #303031;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 0;
+  min-width: 160px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+.context-menu-item {
+  padding: 4px 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.context-menu-item:hover {
+  background: var(--accent);
+  color: #fff;
+}

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>VantageTerm</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <nav id="project-rail" title="Projects">
+        <button id="add-project" title="Open folder…">＋</button>
+      </nav>
+      <aside id="sidebar">
+        <div id="root-name" class="sidebar-header"></div>
+        <div class="sidebar-section-title">Changes</div>
+        <div id="changes"></div>
+        <div class="sidebar-section-title">
+          Files
+          <button id="new-file-btn" title="New file at workspace root">+</button>
+        </div>
+        <div id="tree"></div>
+      </aside>
+      <div id="splitter-v" title="Drag to resize"></div>
+      <main id="maincol">
+        <div id="cat-bar">
+          <button id="cat-term" class="cat active">Terminal</button>
+          <button id="cat-files" class="cat">Files</button>
+        </div>
+        <div id="subtabs-term" class="tabstrip">
+          <button id="new-term" title="New terminal">+</button>
+        </div>
+        <div id="subtabs-files" class="tabstrip hidden"></div>
+        <div id="panes">
+          <div id="empty-state">Open a terminal (+) or click a file to get started.</div>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
