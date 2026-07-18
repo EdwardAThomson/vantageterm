@@ -1,5 +1,5 @@
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
-import { workspaceRoot, canonicalize } from "./ipc";
+import { workspaceRoot, launchedWithFolder, canonicalize } from "./ipc";
 import { setActiveProject, closeProjectTabs } from "./tabs";
 import { modalConfirm, showContextMenu } from "./ui";
 
@@ -122,24 +122,34 @@ export async function openFolder() {
 
 // Seed the rail and return the project that should be active on launch. The
 // caller wires up the rest (tree, git, first terminal) for that project.
+//
+// The launch folder is only added as a project when it was passed explicitly on
+// the command line (`vantageterm /some/repo`). Under `npm run tauri dev` there's
+// no argument, so the app's own directory is NOT force-added; the rail is just
+// your remembered projects. The launch dir is used as a fallback only when
+// there are no remembered projects, so a fresh install still opens with one.
 export async function initProjects(handler: (p: Project) => void): Promise<Project> {
   onSwitch = handler;
   addBtn.addEventListener("click", () => void openFolder());
 
   const launch = await workspaceRoot();
+  const explicit = await launchedWithFolder();
+
   let saved: { root: string }[] = [];
   try {
     saved = JSON.parse(localStorage.getItem("projects") || "[]");
   } catch {
     saved = [];
   }
-  addProject(launch);
-  for (const s of saved) if (s.root !== launch) addProject(s.root);
+
+  if (explicit) addProject(launch);
+  for (const s of saved) addProject(s.root);
+  if (projects.length === 0) addProject(launch);
 
   const savedActive = localStorage.getItem("activeProjectRoot");
-  const active =
-    projects.find((p) => p.root === savedActive) ??
-    projects.find((p) => p.root === launch)!;
+  const active = explicit
+    ? projects.find((p) => p.root === launch)!
+    : (projects.find((p) => p.root === savedActive) ?? projects[0]);
   activeId = active.id;
   setActiveProject(activeId);
   rootNameEl.textContent = active.name;

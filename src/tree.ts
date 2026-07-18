@@ -17,6 +17,8 @@ let statusByPath = new Map<string, string>();
 // expanded directories, kept per project root so each remembers its shape
 const expandedByRoot = new Map<string, Set<string>>();
 let selectedLabel: HTMLElement | null = null;
+// Whether dotfiles (.env, .gitignore, …) are shown in the tree; remembered.
+let showHidden = localStorage.getItem("showHidden") === "1";
 
 function expanded(): Set<string> {
   let s = expandedByRoot.get(rootPath);
@@ -47,6 +49,7 @@ async function renderChildren(container: HTMLElement, dirPath: string) {
   }
   container.textContent = "";
   for (const entry of entries) {
+    if (!showHidden && entry.name.startsWith(".")) continue;
     container.appendChild(nodeFor(entry));
   }
 }
@@ -196,6 +199,21 @@ export function initTree() {
   document
     .getElementById("new-file-btn")!
     .addEventListener("click", () => void newFileIn(rootPath));
+
+  const hiddenBtn = document.getElementById("toggle-hidden")!;
+  const syncHiddenBtn = () => {
+    hiddenBtn.classList.toggle("active", showHidden);
+    hiddenBtn.title = showHidden
+      ? "Hide dotfiles (.env, .gitignore, …)"
+      : "Show dotfiles (.env, .gitignore, …)";
+  };
+  syncHiddenBtn();
+  hiddenBtn.addEventListener("click", () => {
+    showHidden = !showHidden;
+    localStorage.setItem("showHidden", showHidden ? "1" : "0");
+    syncHiddenBtn();
+    void refreshTree();
+  });
 }
 
 // Point the tree at a project root and render it. Called on launch and on each

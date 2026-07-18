@@ -55,6 +55,15 @@ export function refitTerminals() {
   void ptyResize(rec.ptyId, rec.term.cols, rec.term.rows);
 }
 
+// Write text to the active terminal's shell (used by voice input). Only acts
+// when the foreground tab is a terminal, so text can't land in a hidden shell.
+export function typeIntoActiveTerminal(text: string) {
+  const a = getActive();
+  if (!a || a.kind !== "term") return;
+  const rec = terms.get(a.key);
+  if (rec) void ptyWrite(rec.ptyId, text);
+}
+
 function loadRenderer(term: Terminal) {
   // xterm's default DOM renderer builds a large DOM subtree per terminal, so
   // many open terminals get sluggish to switch between. The 2D canvas renderer
@@ -65,6 +74,42 @@ function loadRenderer(term: Terminal) {
   } catch {
     // fall back to the built-in DOM renderer
   }
+}
+
+// iTerm2-style Alt-click to reposition the shell cursor: translate the clicked
+// cell into a character delta from the current cursor and send that many left/
+// right arrow keys, which readline/zsh understand. Uses only horizontal arrows
+// (computed across wrapped rows) so it never triggers command history the way
+// up/down would. Restricted to the normal buffer, so full-screen apps like vim
+// and htop (alternate screen, their own mouse handling) are left alone.
+function enableAltClickToMove(term: Terminal, ptyId: number) {
+  const el = term.element;
+  if (!el) return;
+  el.addEventListener("mousedown", (e) => {
+    if (!e.altKey || e.button !== 0) return;
+    if (term.buffer.active.type !== "normal") return;
+    const screen = el.querySelector(".xterm-screen") as HTMLElement | null;
+    if (!screen) return;
+    const rect = screen.getBoundingClientRect();
+    const cellW = rect.width / term.cols;
+    const cellH = rect.height / term.rows;
+    if (!cellW || !cellH) return;
+
+    const col = Math.max(
+      0,
+      Math.min(term.cols - 1, Math.floor((e.clientX - rect.left) / cellW)),
+    );
+    const row = Math.floor((e.clientY - rect.top) / cellH);
+    const target = row * term.cols + col;
+    const current =
+      term.buffer.active.cursorY * term.cols + term.buffer.active.cursorX;
+    const delta = target - current;
+    if (delta === 0) return;
+
+    e.preventDefault();
+    const arrow = delta > 0 ? "\x1b[C" : "\x1b[D";
+    void ptyWrite(ptyId, arrow.repeat(Math.abs(delta)));
+  });
 }
 
 async function createTerminal() {
@@ -113,6 +158,7 @@ async function createTerminal() {
   const ptyId = await ptySpawn(project.root, term.cols, term.rows);
   term.onData((data) => void ptyWrite(ptyId, data));
   term.onResize(({ cols, rows }) => void ptyResize(ptyId, cols, rows));
+  enableAltClickToMove(term, ptyId);
 
   const rec = { key, ptyId, term, fit, pane: handle.pane, exited: false };
   terms.set(key, rec);

@@ -1,4 +1,5 @@
-import { initTerminals, ensureTerminal } from "./term";
+import { initTerminals, ensureTerminal, typeIntoActiveTerminal } from "./term";
+import { initStt } from "./stt";
 import { initTree, showProject } from "./tree";
 import { initSplitters } from "./splitters";
 import { activateLastTerminal } from "./tabs";
@@ -34,6 +35,10 @@ async function start() {
   // not fire the switch handler for that initial one, so we enter it manually.
   const active = await initProjects((p) => void enterProject(p));
   await enterProject(active);
+
+  // Injects a voice button only if the backend was built with --features stt
+  // and a model is present; otherwise a no-op.
+  void initStt(typeIntoActiveTerminal);
 
   setInterval(() => void refreshChanges(), 2500);
 }

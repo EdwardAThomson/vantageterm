@@ -12,6 +12,7 @@ export interface GitChange {
 }
 
 export const workspaceRoot = () => invoke<string>("workspace_root");
+export const launchedWithFolder = () => invoke<boolean>("launched_with_folder");
 export const canonicalize = (path: string) => invoke<string>("canonicalize", { path });
 export const listDir = (path: string) => invoke<DirEntry[]>("list_dir", { path });
 export const readFile = (path: string) => invoke<string>("read_file", { path });

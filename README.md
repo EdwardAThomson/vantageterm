@@ -61,6 +61,37 @@ The built binary takes a folder to open as its first argument:
 vantageterm ~/some/repo
 ```
 
+## Voice input (optional, fully local)
+
+VantageTerm can transcribe speech into the active terminal so you can dictate to
+a CLI agent. It's **off by default** and gated behind a Cargo feature, so the
+normal build stays lean and pulls in no audio/ML dependencies. When enabled,
+transcription runs entirely on your machine (whisper.cpp) — your audio never
+leaves the device.
+
+Enable it at build time:
+
+```bash
+# dev
+npm run tauri dev -- --features stt
+# release
+npm run tauri build -- --features stt
+```
+
+You also need the Whisper model weights on disk (a one-time download of the
+weights file, *not* your audio going anywhere). Place a `ggml-*.bin` model in:
+
+```
+~/.local/share/vantageterm/models/
+```
+
+Models are available from the whisper.cpp project (e.g. `ggml-base.en.bin`,
+~140 MB). With the feature compiled and a model present, a **voice** button
+appears in the terminal tab strip: click to record, click again to transcribe;
+the text is typed into the active terminal for you to review.
+
+Model weights are never committed to the repo (see `.gitignore`).
+
 ## Project structure
 
 ```

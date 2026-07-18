@@ -1,5 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod stt;
+
 use portable_pty::{native_pty_system, Child, CommandBuilder, MasterPty, PtySize};
 use serde::Serialize;
 use std::collections::HashMap;
@@ -16,9 +18,12 @@ struct PtySession {
 }
 
 struct AppState {
-    // The folder VantageTerm was launched in: the first project in the rail.
+    // The folder VantageTerm was launched in, used as a fallback project.
     // Per-call roots (below) let one window drive many projects.
     root: PathBuf,
+    // True only when a folder was passed explicitly on the command line, so the
+    // frontend can avoid force-adding the dev launch dir as a project.
+    launch_explicit: bool,
     ptys: Mutex<HashMap<u32, PtySession>>,
     next_pty_id: Mutex<u32>,
 }
@@ -42,27 +47,32 @@ struct GitChange {
     status: String,
 }
 
-fn workspace_dir() -> PathBuf {
-    // Optional CLI arg names the folder to open; otherwise use the process cwd.
-    // Under `tauri dev` the cwd is src-tauri, which is never what the user wants,
-    // so step up to the project root in that case.
+fn workspace_dir() -> (PathBuf, bool) {
+    // Optional CLI arg names the folder to open (explicit); otherwise fall back
+    // to the process cwd (not explicit). Under `tauri dev` the cwd is src-tauri,
+    // which is never what the user wants, so step up to the project root.
     if let Some(arg) = std::env::args().nth(1) {
         if let Ok(p) = std::fs::canonicalize(&arg) {
-            return p;
+            return (p, true);
         }
     }
     let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("/"));
     if cwd.file_name().is_some_and(|n| n == "src-tauri") {
         if let Some(parent) = cwd.parent() {
-            return parent.to_path_buf();
+            return (parent.to_path_buf(), false);
         }
     }
-    cwd
+    (cwd, false)
 }
 
 #[tauri::command]
 fn workspace_root(state: State<AppState>) -> String {
     state.root.to_string_lossy().into_owned()
+}
+
+#[tauri::command]
+fn launched_with_folder(state: State<AppState>) -> bool {
+    state.launch_explicit
 }
 
 #[tauri::command]
@@ -290,8 +300,10 @@ fn pty_kill(state: State<AppState>, id: u32) -> Result<(), String> {
 }
 
 fn main() {
+    let (root, launch_explicit) = workspace_dir();
     let state = AppState {
-        root: workspace_dir(),
+        root,
+        launch_explicit,
         ptys: Mutex::new(HashMap::new()),
         next_pty_id: Mutex::new(0),
     };
@@ -300,6 +312,7 @@ fn main() {
         .manage(state)
         .invoke_handler(tauri::generate_handler![
             workspace_root,
+            launched_with_folder,
             canonicalize,
             list_dir,
             read_file,
@@ -314,6 +327,9 @@ fn main() {
             pty_write,
             pty_resize,
             pty_kill,
+            stt::stt_available,
+            stt::stt_start,
+            stt::stt_stop,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -139,6 +139,22 @@ body {
   color: var(--fg);
 }
 
+.section-actions {
+  display: flex;
+  gap: 2px;
+}
+
+/* Toggle lit when dotfiles are being shown. */
+#toggle-hidden {
+  font-size: 12px;
+  letter-spacing: -1px;
+}
+
+#toggle-hidden.active {
+  background: var(--accent);
+  color: #fff;
+}
+
 #changes {
   padding-bottom: 6px;
 }
@@ -374,6 +390,57 @@ body {
 
 #new-term:hover {
   background: #37373d;
+}
+
+/* Voice-input button (only injected when the local STT feature is available). */
+#mic-btn {
+  border: none;
+  background: none;
+  color: var(--fg-dim);
+  font-size: 13px;
+  padding: 0 14px;
+  cursor: pointer;
+  order: 100;
+  margin-left: auto;
+}
+
+#mic-btn:hover {
+  background: #37373d;
+  color: var(--fg);
+}
+
+/* Instant tactile acknowledgement the moment the button is pressed, driven by
+   CSS alone so it never depends on JS state or async timing. */
+#mic-btn:active {
+  transform: scale(0.9);
+}
+
+/* Filled pills so record/transcribe states are unmistakable regardless of
+   whether the spinner glyph renders in the user's font. */
+#mic-btn.recording {
+  color: #fff;
+  background: #c0392b;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+#mic-btn.transcribing {
+  color: #1e1e1e;
+  background: var(--git-modified);
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: progress;
+  animation: mic-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 
