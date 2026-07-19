@@ -2,6 +2,9 @@ node_modules/
 dist/
 src-tauri/target/
 
+# Scratch area for work-in-progress files (screenshots, notes, etc.).
+temp/
+
 # Local speech-to-text model weights — never commit these (large binaries).
 # They live in the user data dir by default; only ignored here in case someone
 # drops a model into the repo for local testing.

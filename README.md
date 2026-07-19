@@ -11,6 +11,11 @@ projects at once.
 Built with **Tauri 2** (Rust backend), **xterm.js** (terminals), and
 **Monaco** (the viewer and diff editor VS Code itself uses).
 
+![Reviewing a change as a side-by-side diff in VantageTerm](docs/diff-review.png)
+
+*Reviewing a change as a side-by-side diff — the Monaco diff editor, with the
+git Changes list in the sidebar.*
+
 ## Features
 
 - **Project rail** — open several projects at once; each keeps its own
