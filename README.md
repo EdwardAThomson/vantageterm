@@ -4,6 +4,8 @@ A lightweight desktop vantage point for working with Claude Code (or any CLI
 agent): a multi-tab terminal, a file tree with git status, and VS Code-quality
 file viewing and side-by-side diffs, without the weight of a full IDE.
 
+![VantageTerm running a Claude Code session, with the project rail, git changes, and file tree alongside the terminal](docs/terminal.png)
+
 The idea: keep your terminal front and center where the agent does its work,
 and make reviewing what changed (files and diffs) a click away, across several
 projects at once.
