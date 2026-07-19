@@ -18,8 +18,11 @@ Built with **Tauri 2** (Rust backend), **xterm.js** (terminals), and
   click. Open projects are remembered between runs.
 - **Multi-tab terminals** — real ptys running your shell in the project root.
   Rename a tab from its right-click menu. Rendered to a canvas for speed.
+  Alt-click moves the shell cursor to the click point (plain shell prompts
+  only; full-screen apps like vim are left alone).
 - **File tree with git status** — yellow = modified, green = added/untracked,
   red = deleted. Right-click for New File / New Folder / Rename / Delete.
+  A sidebar toggle shows or hides dotfiles, remembered between runs.
 - **Changes list** — every modified file for the active project; click one to
   open its diff against `HEAD`.
 - **File viewing and light editing** — full syntax highlighting via Monaco.
@@ -46,7 +49,8 @@ category.
 
 ```bash
 npm install
-npm run tauri dev            # opens the folder VantageTerm was launched from
+npm run tauri dev            # opens your remembered projects
+                             # (first run: the folder it was launched from)
 ```
 
 ## Build
@@ -106,7 +110,9 @@ src/                     Frontend (vanilla TypeScript + Vite)
   splitters.ts           Sidebar resize
   ui.ts                  Modal prompts / confirms / context menus
   ipc.ts                 Typed wrappers over Tauri commands
+  stt.ts                 Voice input UI (active only with the `stt` feature)
 src-tauri/src/main.rs     Rust backend: ptys, filesystem, git, folder picker
+src-tauri/src/stt.rs      Optional local speech-to-text (`stt` feature)
 ```
 
 ## Status
