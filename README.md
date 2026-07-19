@@ -25,8 +25,10 @@ git Changes list in the sidebar.*
   click. Open projects are remembered between runs.
 - **Multi-tab terminals** — real ptys running your shell in the project root.
   Rename a tab from its right-click menu. Rendered to a canvas for speed.
-  Alt-click moves the shell cursor to the click point (plain shell prompts
-  only; full-screen apps like vim are left alone).
+- **Alt-click to move the cursor** — hold Alt and click anywhere in a shell
+  prompt to jump the cursor there (iTerm2-style), computed across wrapped lines
+  so it never triggers command history. Full-screen apps like vim keep their
+  own mouse handling.
 - **File tree with git status** — yellow = modified, green = added/untracked,
   red = deleted. Right-click for New File / New Folder / Rename / Delete.
   A sidebar toggle shows or hides dotfiles, remembered between runs.
