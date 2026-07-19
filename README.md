@@ -53,17 +53,36 @@ npm run tauri dev            # opens your remembered projects
                              # (first run: the folder it was launched from)
 ```
 
-## Build
+## Build a standalone binary
+
+For a fast-starting, self-contained app (no npm, no dev server), build in
+release mode — Tauri embeds the frontend into the binary:
 
 ```bash
-npm run tauri build
+npm run tauri build                     # lean build
+npm run tauri build -- --features stt   # include local voice input
 ```
 
-The built binary takes a folder to open as its first argument:
+The binary lands at `src-tauri/target/release/vantageterm`.
+
+## Install as a command
+
+Put it on your `PATH` so `vantageterm` works from any directory:
 
 ```bash
-vantageterm ~/some/repo
+ln -sf "$PWD/src-tauri/target/release/vantageterm" ~/.local/bin/vantageterm
 ```
+
+(Make sure `~/.local/bin` is on your `PATH`.) Then:
+
+```bash
+vantageterm              # open the current directory as a project
+vantageterm ~/some/repo  # open a specific folder
+```
+
+Because it's a symlink into `target/`, rebuilding picks up the new binary
+automatically. Note that `cargo clean` removes the binary until you rebuild; for
+a copy that survives cleans, use `cp` instead of `ln -sf`.
 
 ## Voice input (optional, fully local)
 
