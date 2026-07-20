@@ -27,7 +27,7 @@ export async function initTts(getSelection: () => string) {
   btn.id = "speak-btn";
   const idleTitle =
     "Speech output: select terminal text, click to hear it (local)";
-  btn.textContent = "speak";
+  btn.textContent = "read aloud";
   btn.title = idleTitle;
   strip.appendChild(btn);
 
@@ -37,7 +37,7 @@ export async function initTts(getSelection: () => string) {
   const setIdle = () => {
     speaking = false;
     btn.classList.remove("speaking");
-    btn.textContent = "speak";
+    btn.textContent = "read aloud";
     btn.title = idleTitle;
   };
 

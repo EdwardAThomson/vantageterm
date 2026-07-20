@@ -44,7 +44,7 @@ async function start() {
 
   // Each injects a button only if the backend was built with the matching
   // feature (--features stt / tts) and a model is present; otherwise no-ops.
-  // Sequenced so the voice and speak buttons land in a stable DOM order.
+  // Sequenced so the dictate and read-aloud buttons land in a stable order.
   void initStt(typeIntoActiveTerminal).then(() =>
     initTts(getActiveTerminalSelection),
   );

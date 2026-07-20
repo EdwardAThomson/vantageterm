@@ -26,7 +26,9 @@ export async function initStt(typeIntoActiveTerminal: (text: string) => void) {
   const strip = document.getElementById("subtabs-term")!;
   const btn = document.createElement("button");
   btn.id = "mic-btn";
-  btn.textContent = "voice";
+  // "dictate" so the subject is unambiguous (you dictate, the app types);
+  // its counterpart in tts.ts is "read aloud" (the app reads to you).
+  btn.textContent = "dictate";
   btn.title = "Voice input: click to record, click again to transcribe (local)";
   strip.appendChild(btn);
 
@@ -36,7 +38,7 @@ export async function initStt(typeIntoActiveTerminal: (text: string) => void) {
   const setIdle = () => {
     recording = false;
     btn.classList.remove("recording");
-    btn.textContent = "voice";
+    btn.textContent = "dictate";
     btn.title = "Voice input: click to record, click again to transcribe (local)";
   };
 

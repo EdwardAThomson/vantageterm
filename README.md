@@ -124,7 +124,7 @@ weights file, *not* your audio going anywhere). Place a `ggml-*.bin` model in:
 ```
 
 Models are available from the whisper.cpp project (e.g. `ggml-base.en.bin`,
-~140 MB). With the feature compiled and a model present, a **voice** button
+~140 MB). With the feature compiled and a model present, a **dictate** button
 appears in the terminal tab strip: click to record, click again to transcribe;
 the text is typed into the active terminal for you to review.
 
@@ -137,7 +137,7 @@ Model weights are never committed to the repo (see `.gitignore`).
 ## Speech output (optional, fully local)
 
 VantageTerm can also read terminal text aloud: select text in a terminal, click
-the **speak** button in the tab strip, and a local [Piper](https://github.com/rhasspy/piper)
+the **read aloud** button in the tab strip, and a local [Piper](https://github.com/rhasspy/piper)
 voice reads it; click again to stop mid-utterance. Like voice input, it's
 **off by default** behind a Cargo feature, synthesis runs entirely on your
 machine, and nothing leaves the device.
