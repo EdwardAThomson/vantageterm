@@ -10,7 +10,7 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Mutex;
-use tauri::{AppHandle, Emitter, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 
 struct PtySession {
     master: Box<dyn MasterPty + Send>,
@@ -40,6 +40,15 @@ struct DirEntry {
 struct PtyOutput {
     id: u32,
     data: Vec<u8>,
+}
+
+#[derive(Serialize, Clone)]
+struct PtyExit {
+    id: u32,
+    // Whether the shell exited with status 0 (`exit` at the prompt) rather
+    // than being killed or crashing; the frontend only auto-closes the tab
+    // for clean exits so failure output stays readable.
+    clean: bool,
 }
 
 #[derive(Serialize, Clone)]
@@ -252,7 +261,20 @@ fn pty_spawn(
                 }
             }
         }
-        let _ = app_for_reader.emit("pty-exit", id);
+        // EOF: the shell is gone. Take the session out of the map (dropping
+        // the lock before the wait) and reap the child for its exit status.
+        let session = app_for_reader
+            .state::<AppState>()
+            .ptys
+            .lock()
+            .unwrap()
+            .remove(&id);
+        let clean = match session {
+            Some(mut s) => s.child.wait().map(|st| st.success()).unwrap_or(false),
+            // Already removed by pty_kill: the tab was closed first.
+            None => false,
+        };
+        let _ = app_for_reader.emit("pty-exit", PtyExit { id, clean });
     });
 
     state.ptys.lock().unwrap().insert(

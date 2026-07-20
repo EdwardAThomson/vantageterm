@@ -25,6 +25,8 @@ git Changes list in the sidebar.*
   click. Open projects are remembered between runs.
 - **Multi-tab terminals** — real ptys running your shell in the project root.
   Rename a tab from its right-click menu. Rendered to a canvas for speed.
+  Typing `exit` closes the tab; a shell that dies abnormally leaves the tab
+  open so you can read what happened.
 - **Alt-click to move the cursor** — hold Alt and click anywhere in a shell
   prompt to jump the cursor there (iTerm2-style), computed across wrapped lines
   so it never triggers command history. Full-screen apps like vim keep their

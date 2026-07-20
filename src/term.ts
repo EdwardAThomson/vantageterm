@@ -4,7 +4,7 @@ import { CanvasAddon } from "@xterm/addon-canvas";
 import "@xterm/xterm/css/xterm.css";
 import { listen } from "@tauri-apps/api/event";
 import { ptySpawn, ptyWrite, ptyResize, ptyKill } from "./ipc";
-import { addTab, activateKey, getActive } from "./tabs";
+import { addTab, activateKey, getActive, requestClose } from "./tabs";
 import { activeProject } from "./projects";
 
 interface TermRec {
@@ -25,10 +25,15 @@ export async function initTerminals() {
   await listen<{ id: number; data: number[] }>("pty-output", (e) => {
     termsByPty.get(e.payload.id)?.term.write(new Uint8Array(e.payload.data));
   });
-  await listen<number>("pty-exit", (e) => {
-    const rec = termsByPty.get(e.payload);
-    if (rec && !rec.exited) {
-      rec.exited = true;
+  await listen<{ id: number; clean: boolean }>("pty-exit", (e) => {
+    const rec = termsByPty.get(e.payload.id);
+    if (!rec || rec.exited) return;
+    rec.exited = true;
+    if (e.payload.clean) {
+      // `exit` at the prompt retires the tab, like clicking its ✕ button.
+      void requestClose(rec.key);
+    } else {
+      // Killed or crashed: keep the pane so the last output stays readable.
       rec.term.write("\r\n\x1b[90m[process exited]\x1b[0m\r\n");
     }
   });
