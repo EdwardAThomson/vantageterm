@@ -128,6 +128,10 @@ Models are available from the whisper.cpp project (e.g. `ggml-base.en.bin`,
 appears in the terminal tab strip: click to record, click again to transcribe;
 the text is typed into the active terminal for you to review.
 
+Other languages: models with `.en` in the name are English-only and are pinned
+to English. Drop in a multilingual model instead (e.g. `ggml-base.bin`) and the
+spoken language is auto-detected.
+
 Model weights are never committed to the repo (see `.gitignore`).
 
 ## Speech output (optional, fully local)
@@ -164,6 +168,11 @@ base=https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/me
 curl -sSLO $base/en_US-lessac-medium.onnx
 curl -sSLO $base/en_US-lessac-medium.onnx.json
 ```
+
+Other languages: Piper has voices for dozens of languages; grab the pair for
+yours (e.g. `de_DE-thorsten-medium`, `fr_FR-siwis-medium`) instead. The voice
+determines the language spoken, so pick one matching the text you'll select;
+the first voice pair found in the models directory is used.
 
 Build notes for the `tts` feature: the Piper bindings generate espeak-ng
 bindings at build time, which needs clang's builtin headers (`sudo apt install

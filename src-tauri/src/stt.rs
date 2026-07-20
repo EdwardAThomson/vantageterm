@@ -230,9 +230,15 @@ mod backend {
         let threads = std::thread::available_parallelism()
             .map(|n| n.get() as i32)
             .unwrap_or(4);
+        // English-only models carry ".en" in the name (e.g. ggml-base.en.bin)
+        // and are pinned to English; multilingual models auto-detect the
+        // spoken language instead.
+        let english_only = model_path()
+            .and_then(|p| p.file_name().map(|n| n.to_string_lossy().contains(".en")))
+            .unwrap_or(true);
         let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 1 });
         params.set_n_threads(threads);
-        params.set_language(Some("en"));
+        params.set_language(Some(if english_only { "en" } else { "auto" }));
         params.set_print_special(false);
         params.set_print_progress(false);
         params.set_print_realtime(false);
