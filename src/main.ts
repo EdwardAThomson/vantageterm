@@ -1,5 +1,11 @@
-import { initTerminals, ensureTerminal, typeIntoActiveTerminal } from "./term";
+import {
+  initTerminals,
+  ensureTerminal,
+  typeIntoActiveTerminal,
+  getActiveTerminalSelection,
+} from "./term";
 import { initStt } from "./stt";
+import { initTts } from "./tts";
 import { initTree, showProject } from "./tree";
 import { initSplitters } from "./splitters";
 import { activateLastTerminal } from "./tabs";
@@ -36,9 +42,12 @@ async function start() {
   const active = await initProjects((p) => void enterProject(p));
   await enterProject(active);
 
-  // Injects a voice button only if the backend was built with --features stt
-  // and a model is present; otherwise a no-op.
-  void initStt(typeIntoActiveTerminal);
+  // Each injects a button only if the backend was built with the matching
+  // feature (--features stt / tts) and a model is present; otherwise no-ops.
+  // Sequenced so the voice and speak buttons land in a stable DOM order.
+  void initStt(typeIntoActiveTerminal).then(() =>
+    initTts(getActiveTerminalSelection),
+  );
 
   setInterval(() => void refreshChanges(), 2500);
 }

@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod stt;
+mod tts;
 
 use portable_pty::{native_pty_system, Child, CommandBuilder, MasterPty, PtySize};
 use serde::Serialize;
@@ -330,6 +331,9 @@ fn main() {
             stt::stt_available,
             stt::stt_start,
             stt::stt_stop,
+            tts::tts_available,
+            tts::tts_speak,
+            tts::tts_stop,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -64,6 +64,14 @@ export function typeIntoActiveTerminal(text: string) {
   if (rec) void ptyWrite(rec.ptyId, text);
 }
 
+// Selected text in the active terminal (used by speech output). Empty when the
+// foreground tab isn't a terminal or nothing is selected.
+export function getActiveTerminalSelection(): string {
+  const a = getActive();
+  if (!a || a.kind !== "term") return "";
+  return terms.get(a.key)?.term.getSelection() ?? "";
+}
+
 function loadRenderer(term: Terminal) {
   // xterm's default DOM renderer builds a large DOM subtree per terminal, so
   // many open terminals get sluggish to switch between. The 2D canvas renderer

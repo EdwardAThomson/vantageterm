@@ -18,9 +18,15 @@ portable-pty = "0.9"
 cpal = { version = "0.15", optional = true }
 whisper-rs = { version = "0.14", optional = true }
 
+# Optional, fully-local text-to-speech. Only compiled with `--features tts`, so
+# the default build pulls in neither onnxruntime nor the playback stack.
+piper-rs = { version = "0.2", optional = true }
+rodio = { version = "0.19", optional = true }
+
 [features]
 default = []
 stt = ["dep:cpal", "dep:whisper-rs"]
+tts = ["dep:piper-rs", "dep:rodio"]
 
 [profile.release]
 strip = true

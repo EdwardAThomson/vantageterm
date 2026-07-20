@@ -68,8 +68,10 @@ For a fast-starting, self-contained app (no npm, no dev server), build in
 release mode — Tauri embeds the frontend into the binary:
 
 ```bash
-npm run tauri build                     # lean build
-npm run tauri build -- --features stt   # include local voice input
+npm run tauri build                          # lean build
+npm run tauri build -- --features stt        # include local voice input
+npm run tauri build -- --features tts        # include local speech output
+npm run tauri build -- --features stt,tts    # both
 ```
 
 The binary lands at `src-tauri/target/release/vantageterm`.
@@ -124,6 +126,48 @@ the text is typed into the active terminal for you to review.
 
 Model weights are never committed to the repo (see `.gitignore`).
 
+## Speech output (optional, fully local)
+
+VantageTerm can also read terminal text aloud: select text in a terminal, click
+the **speak** button in the tab strip, and a local [Piper](https://github.com/rhasspy/piper)
+voice reads it; click again to stop mid-utterance. Like voice input, it's
+**off by default** behind a Cargo feature, synthesis runs entirely on your
+machine, and nothing leaves the device.
+
+Enable it at build time (combines freely with `stt`):
+
+```bash
+# dev
+npm run tauri dev -- --features tts
+# release
+npm run tauri build -- --features tts
+```
+
+You also need a Piper voice on disk: a pair of files, `<voice>.onnx` plus
+`<voice>.onnx.json`, both placed in the same models directory as the Whisper
+weights:
+
+```
+~/.local/share/vantageterm/models/
+```
+
+Voices are available from [rhasspy/piper-voices](https://huggingface.co/rhasspy/piper-voices)
+on Hugging Face; `en_US-lessac-medium` (~63 MB) is a good default:
+
+```bash
+cd ~/.local/share/vantageterm/models
+base=https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium
+curl -sSLO $base/en_US-lessac-medium.onnx
+curl -sSLO $base/en_US-lessac-medium.onnx.json
+```
+
+Build notes for the `tts` feature: the Piper bindings generate espeak-ng
+bindings at build time, which needs clang's builtin headers (`sudo apt install
+libclang-dev`, or point bindgen at GCC's copy with
+`BINDGEN_EXTRA_CLANG_ARGS=-I/usr/lib/gcc/x86_64-linux-gnu/13/include`), and the
+onnxruntime backend downloads its prebuilt runtime during the first build, so
+that build needs network access.
+
 ## Project structure
 
 ```
@@ -139,8 +183,10 @@ src/                     Frontend (vanilla TypeScript + Vite)
   ui.ts                  Modal prompts / confirms / context menus
   ipc.ts                 Typed wrappers over Tauri commands
   stt.ts                 Voice input UI (active only with the `stt` feature)
+  tts.ts                 Speech output UI (active only with the `tts` feature)
 src-tauri/src/main.rs     Rust backend: ptys, filesystem, git, folder picker
 src-tauri/src/stt.rs      Optional local speech-to-text (`stt` feature)
+src-tauri/src/tts.rs      Optional local text-to-speech (`tts` feature)
 ```
 
 ## Status

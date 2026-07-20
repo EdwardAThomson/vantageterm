@@ -392,8 +392,12 @@ body {
   background: #37373d;
 }
 
-/* Voice-input button (only injected when the local STT feature is available). */
-#mic-btn {
+/* Voice-input and speech-output buttons (each only injected when its local
+   feature is available). Both carry margin-left: auto so whichever exists
+   alone still sits at the right edge; when both are present the later sibling
+   drops its auto margin so they stay adjacent (main.ts injects mic first). */
+#mic-btn,
+#speak-btn {
   border: none;
   background: none;
   color: var(--fg-dim);
@@ -404,14 +408,20 @@ body {
   margin-left: auto;
 }
 
-#mic-btn:hover {
+#mic-btn ~ #speak-btn {
+  margin-left: 0;
+}
+
+#mic-btn:hover,
+#speak-btn:hover {
   background: #37373d;
   color: var(--fg);
 }
 
 /* Instant tactile acknowledgement the moment the button is pressed, driven by
    CSS alone so it never depends on JS state or async timing. */
-#mic-btn:active {
+#mic-btn:active,
+#speak-btn:active {
   transform: scale(0.9);
 }
 
@@ -430,6 +440,15 @@ body {
   font-weight: 600;
   border-radius: 4px;
   cursor: progress;
+  animation: mic-pulse 0.9s ease-in-out infinite;
+}
+
+/* Speech output playing: green so it can't be confused with the mic states. */
+#speak-btn.speaking {
+  color: #1e1e1e;
+  background: var(--git-added);
+  font-weight: 600;
+  border-radius: 4px;
   animation: mic-pulse 0.9s ease-in-out infinite;
 }
 
