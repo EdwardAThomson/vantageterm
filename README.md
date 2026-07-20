@@ -31,7 +31,9 @@ git Changes list in the sidebar.*
   own mouse handling.
 - **File tree with git status** — yellow = modified, green = added/untracked,
   red = deleted. Right-click for New File / New Folder / Rename / Delete.
-  A sidebar toggle shows or hides dotfiles, remembered between runs.
+  The tree picks up files an agent creates or deletes within a few seconds,
+  without disturbing scroll or expansion. A sidebar toggle shows or hides
+  dotfiles, remembered between runs.
 - **Changes list** — every modified file for the active project; click one to
   open its diff against `HEAD`.
 - **File viewing and light editing** — full syntax highlighting via Monaco.

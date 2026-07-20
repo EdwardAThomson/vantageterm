@@ -6,7 +6,7 @@ import {
 } from "./term";
 import { initStt } from "./stt";
 import { initTts } from "./tts";
-import { initTree, showProject } from "./tree";
+import { initTree, showProject, pollTree } from "./tree";
 import { initSplitters } from "./splitters";
 import { activateLastTerminal } from "./tabs";
 import { initProjects, type Project } from "./projects";
@@ -49,7 +49,10 @@ async function start() {
     initTts(getActiveTerminalSelection),
   );
 
-  setInterval(() => void refreshChanges(), 2500);
+  setInterval(() => {
+    void refreshChanges();
+    void pollTree();
+  }, 2500);
 }
 
 void start();

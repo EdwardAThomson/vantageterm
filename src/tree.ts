@@ -40,13 +40,32 @@ function gitClass(status: string | undefined): string {
   return "git-modified";
 }
 
-async function renderChildren(container: HTMLElement, dirPath: string) {
-  let entries: DirEntry[] = [];
-  try {
-    entries = await listDir(dirPath);
-  } catch {
-    return;
+// Signature of each directory's rendered listing, so the poll can tell whether
+// anything actually changed before touching the DOM.
+const renderedSig = new Map<string, string>();
+
+function sigOf(entries: DirEntry[]): string {
+  const parts: string[] = [];
+  for (const e of entries) {
+    if (!showHidden && e.name.startsWith(".")) continue;
+    parts.push(`${e.is_dir ? "d" : "f"}:${e.name}`);
   }
+  return parts.join("\n");
+}
+
+async function renderChildren(
+  container: HTMLElement,
+  dirPath: string,
+  entries?: DirEntry[],
+) {
+  if (!entries) {
+    try {
+      entries = await listDir(dirPath);
+    } catch {
+      return;
+    }
+  }
+  renderedSig.set(dirPath, sigOf(entries));
   container.textContent = "";
   for (const entry of entries) {
     if (!showHidden && entry.name.startsWith(".")) continue;
@@ -238,4 +257,48 @@ export function applyGitStatus(changes: GitChange[]) {
 
 export async function refreshTree() {
   await renderChildren(treeEl, rootPath);
+}
+
+let pollBusy = false;
+
+// Called on the shared 2.5s poll: pick up files created, renamed, or deleted
+// outside the app (agents, shells) by re-listing the root and every expanded
+// directory. Only directories whose visible contents changed are re-rendered,
+// so scroll position, expansion, and selection are untouched on quiet ticks.
+export async function pollTree() {
+  if (pollBusy || !rootPath) return;
+  pollBusy = true;
+  try {
+    // Parents first (shorter paths), so a re-rendered directory lets us skip
+    // its descendants: renderChildren already rebuilt them fresh.
+    const dirs = [rootPath, ...expanded()].sort((a, b) => a.length - b.length);
+    const redone: string[] = [];
+    for (const dir of dirs) {
+      if (redone.some((d) => dir.startsWith(d + "/"))) continue;
+      const container =
+        dir === rootPath
+          ? treeEl
+          : (treeEl.querySelector(`.tree-label[data-path="${CSS.escape(dir)}"]`)
+              ?.nextElementSibling as HTMLElement | null);
+      if (!container) continue; // expanded but not visible (ancestor collapsed)
+      let entries: DirEntry[];
+      try {
+        entries = await listDir(dir);
+      } catch {
+        continue; // e.g. directory vanished; its parent's diff handles it
+      }
+      if (sigOf(entries) === renderedSig.get(dir)) continue;
+      const selPath = selectedLabel?.dataset.path;
+      await renderChildren(container, dir, entries);
+      redone.push(dir);
+      if (selPath) {
+        selectedLabel = treeEl.querySelector<HTMLElement>(
+          `.tree-label[data-path="${CSS.escape(selPath)}"]`,
+        );
+        selectedLabel?.classList.add("selected");
+      }
+    }
+  } finally {
+    pollBusy = false;
+  }
 }
